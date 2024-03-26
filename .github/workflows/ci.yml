@@ -1,0 +1,120 @@
+---
+name: Go CI
+
+on:  # yamllint disable-line rule:truthy
+  pull_request:
+    branches: [master]
+
+# https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs#defining-access-for-the-github_token-scopes
+permissions:
+  contents: read
+
+jobs:
+  #
+  # build
+  #
+  build:
+    name: Build proxrm
+    runs-on: [self-hosted, linux, x64, acme]
+    environment: development
+    timeout-minutes: 5
+    strategy:
+      fail-fast: true
+    # Use the Bash shell regardless whether the GitHub Actions
+    # runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Setup go on the runner
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+          check-latest: true
+
+      - name: Go Get
+        run: go get github.com/Telmate/proxmox-api-go@latest
+        continue-on-error: true
+
+      - name: Go Format
+        run: gofmt -s -w . && git diff --exit-code
+        continue-on-error: true
+
+      - name: Go Vet
+        run: go vet ./...
+        continue-on-error: true
+
+      - name: Go Mod Tidy
+        run: go mod tidy && git diff --exit-code
+        continue-on-error: true
+
+      - name: Go Mod Download
+        run: go mod download
+        continue-on-error: true
+
+      - name: Go Mod Verify
+        run: go mod verify
+        continue-on-error: true
+
+      - name: Install golint
+        run: go install golang.org/x/lint/golint@latest
+
+      - name: Run golint
+        run: golint ./...
+        continue-on-error: true
+
+      - name: Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+
+      - name: Run staticcheck
+        run: staticcheck ./... || exit 0
+        continue-on-error: true
+
+      - name: Install gocyclo
+        run: go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+
+      - name: Run gocyclo
+        run: gocyclo . || exit 0
+        continue-on-error: true
+
+      - name: Run gocyclo top 10
+        run: gocyclo -top 10 . || exit 0
+        continue-on-error: true
+
+      - name: Run gocyclo over 5
+        run: gocyclo -over 5 . || exit 0
+        continue-on-error: true
+
+      - name: Run gocyclo average
+        run: gocyclo -avg . || exit 0
+        continue-on-error: true
+
+      - name: Run gocyclo over 2 average
+        run: gocyclo -over 2 -avg . || exit 0
+        continue-on-error: true
+
+      - name: Install ineffassign
+        run: go install github.com/gordonklaus/ineffassign@latest
+
+      - name: Run ineffassign
+        run: ineffassign ./...
+        continue-on-error: true
+
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Run govulncheck
+        run: govulncheck -test -show verbose ./...
+        continue-on-error: true
+
+      - name: Build
+        run: go build -v .
+
+      - name: Test
+        run: go test -v .
