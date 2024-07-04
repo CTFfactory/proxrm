@@ -1,5 +1,5 @@
 module proxrm
 
-go 1.22.4
+go 1.22.5
 
-require github.com/Telmate/proxmox-api-go v0.0.0-20240616083239-78e131aa830b
+require github.com/Telmate/proxmox-api-go v0.0.0-20240624063742-b5ee3f5af00b
