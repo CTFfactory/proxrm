@@ -36,8 +36,7 @@ func (cc *ClientConfig) Initialize() error {
 	// task timeout
 	cc.timeout, err = strconv.Atoi(os.Getenv("PROXMOX_TIMEOUT"))
 	if err != nil {
-		fmt.Printf("ERROR: PROXMOX_TIMEOUT: %s\n", err)
-		return err
+		return fmt.Errorf(" 💲 $PROXMOX_TIMEOUT: %s", err)
 	}
 
 	// need url

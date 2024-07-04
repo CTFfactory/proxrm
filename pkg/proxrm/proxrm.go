@@ -12,8 +12,6 @@ package proxrm
 import (
 	"crypto/tls"
 	"fmt"
-	"os"
-	"strconv"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
 )
@@ -26,44 +24,37 @@ type ProxRm struct {
 }
 
 // Run does all the coordinating
-func (proxrm *ProxRm) Run() error {
+func (proxrm *ProxRm) Run(vmid int) error {
 	var err error
 
 	// vmid
 	// TODO: add more logic to verify
-	vmid, err := strconv.Atoi(os.Args[1])
-	if err != nil {
-		return err
-	} else if vmid <= 0 {
-		return fmt.Errorf("ERROR: vmid is %d", vmid)
+	if vmid <= 0 {
+		return fmt.Errorf("vm id is %d", vmid)
 	}
 
 	// Initialize
 	err = proxrm.Initialize(vmid)
 	if err != nil {
-		fmt.Printf("ERROR: Initialization: %s\n", err)
-		return err
+		return fmt.Errorf("initialization: %s", err)
 	}
 
 	// Ping vm
 	err = proxrm.ping()
 	if err != nil {
-		fmt.Printf("ERROR: Ping: %s\n", err)
-		return err
+		return fmt.Errorf("ping: %s", err)
 	}
 
 	// Stop vm
 	err = proxrm.stop()
 	if err != nil {
-		fmt.Printf("ERROR: Stop: %s\n", err)
-		return err
+		return fmt.Errorf("stop: %s", err)
 	}
 
 	// Delete
 	err = proxrm.delete()
 	if err != nil {
-		fmt.Printf("ERROR: Delete: %s\n", err)
-		return err
+		return fmt.Errorf("delete: %s", err)
 	}
 
 	return err
@@ -79,12 +70,12 @@ func (proxrm *ProxRm) Initialize(vmid int) error {
 	// client
 	err = proxrm.newClient()
 	if err != nil {
-		return err
+		return fmt.Errorf("newClient: %s", err)
 	}
 
 	// make sure client is not nil
 	if proxrm.client == nil {
-		return fmt.Errorf(" 🔐 client is nil")
+		return fmt.Errorf("client is nil")
 	}
 
 	// get vm reference
@@ -92,7 +83,7 @@ func (proxrm *ProxRm) Initialize(vmid int) error {
 
 	// make sure vm reference is not nil
 	if vmr == nil {
-		return fmt.Errorf(" 🔐 vm reference is nil")
+		return fmt.Errorf("vm reference is nil")
 	}
 
 	// vmref
@@ -108,7 +99,7 @@ func (proxrm *ProxRm) newClient() error {
 	clientConfig := new(ClientConfig)
 	err = clientConfig.Initialize()
 	if err != nil {
-		return err
+		return fmt.Errorf("client init: %s", err)
 	}
 
 	// use insecure client
@@ -119,14 +110,14 @@ func (proxrm *ProxRm) newClient() error {
 	// new client
 	proxrm.client, err = proxmox.NewClient(clientConfig.url, nil, "", &tlsConfig, "", clientConfig.timeout)
 	if err != nil {
-		return err
+		return fmt.Errorf("client: %s", err)
 	}
 
 	// authenticate with username/password or username/token
 	if clientConfig.password != "" {
 		err = proxrm.client.Login(clientConfig.username, clientConfig.password, "")
 		if err != nil {
-			return err
+			return fmt.Errorf("client login: %s", err)
 		}
 	} else if clientConfig.token != "" {
 		proxrm.client.SetAPIToken(clientConfig.username, clientConfig.token)
@@ -134,10 +125,8 @@ func (proxrm *ProxRm) newClient() error {
 
 	// make sure client is not empty
 	if proxrm.client == nil {
-		return fmt.Errorf(" 🔐 proxmox client is nil: %s", err)
+		return fmt.Errorf("client is nil: %s", err)
 	}
-
-	fmt.Println(" 🔓 proxmox client obtained")
 
 	return err
 }
@@ -147,10 +136,8 @@ func (proxrm *ProxRm) ping() error {
 	// As test, get the version of the server
 	_, err := proxrm.client.GetVersion()
 	if err != nil {
-		return err
+		return fmt.Errorf("ping: %s", err)
 	}
-
-	fmt.Printf(" 🏓 pinged vmid: %d\n", proxrm.vmid)
 
 	return err
 }
@@ -159,7 +146,7 @@ func (proxrm *ProxRm) ping() error {
 func (proxrm *ProxRm) stop() error {
 	_, err := proxrm.client.StopVm(proxrm.vmr)
 	if err != nil {
-		return err
+		return fmt.Errorf("stop vm: %s", err)
 	}
 
 	fmt.Printf(" 🛑 stopped vmid: %d\n", proxrm.vmid)
@@ -171,7 +158,7 @@ func (proxrm *ProxRm) stop() error {
 func (proxrm *ProxRm) delete() error {
 	_, err := proxrm.client.DeleteVm(proxrm.vmr)
 	if err != nil {
-		return err
+		return fmt.Errorf("delete vmid: %s", err)
 	}
 
 	fmt.Printf(" 🗑️ deleted vmid: %d\n", proxrm.vmid)
