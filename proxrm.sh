@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "pve (local) pve build16"
+echo "pve (local) pve test-999"
 . .env.pve
 ./proxrm --id 999
 
@@ -8,7 +8,7 @@ echo "-----"
 
 unset PROXMOX_TOKEN
 
-echo "pvj-p (prod is dev) vpc-router0.pvj-p-1.test.dev.ctf"
+echo "pvj-p (prod is dev) test-999"
 . .env.pvj-p
 ./proxrm --id 999
 
@@ -16,7 +16,7 @@ echo "-----"
 
 unset PROXMOX_PASSWORD
 
-echo "pvj-i (dev is prod) vpn.prosversusjoes.net"
+echo "pvj-i (dev is prod) test-999"
 . .env.pvj-i
 ./proxrm --id 999
 
