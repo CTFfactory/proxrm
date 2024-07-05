@@ -23,12 +23,23 @@
 
 Remove Packer build template/vm artifacts from Proxmox with this easy to use tool.
 
-## .env
+### .env
 ```
 export PROXMOX_URL=http://10.31.33.7:8006/api2/json
 export PROXMOX_USERNAME=user@node!tokenid
 export PROXMOX_PASSWORD=Password
 export PROXMOX_TOKEN=c2c42a66-2866-3795-2238-ef60a11544c0
+export PROXMOX_TIMEOUT=300
+```
+
+### by id:
+```
+./proxrm --id 999
+```
+
+### by name:
+```
+./proxrm --name test-999
 ```
 
 ### TODO List:
