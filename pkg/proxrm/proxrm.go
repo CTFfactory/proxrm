@@ -19,22 +19,17 @@ import (
 // ProxRm app struct for shared storage
 type ProxRm struct {
 	vmid   int
+	vmname string
 	client *proxmox.Client
 	vmr    *proxmox.VmRef
 }
 
 // Run does all the coordinating
-func (proxrm *ProxRm) Run(vmid int) error {
+func (proxrm *ProxRm) Run(vmid int, vmname string) error {
 	var err error
 
-	// vmid
-	// TODO: add more logic to verify
-	if vmid <= 0 {
-		return fmt.Errorf("vm id is %d", vmid)
-	}
-
 	// Initialize
-	err = proxrm.Initialize(vmid)
+	err = proxrm.Initialize(vmid, vmname)
 	if err != nil {
 		return fmt.Errorf("initialization: %s", err)
 	}
@@ -61,11 +56,12 @@ func (proxrm *ProxRm) Run(vmid int) error {
 }
 
 // Initialize it all
-func (proxrm *ProxRm) Initialize(vmid int) error {
+func (proxrm *ProxRm) Initialize(vmid int, vmname string) error {
 	var err error
+	var vmr *proxmox.VmRef
 
-	// vmid
 	proxrm.vmid = vmid
+	proxrm.vmname = vmname
 
 	// client
 	err = proxrm.newClient()
@@ -79,7 +75,14 @@ func (proxrm *ProxRm) Initialize(vmid int) error {
 	}
 
 	// get vm reference
-	vmr := proxmox.NewVmRef(vmid)
+	if proxrm.vmid >= 100 {
+		vmr = proxmox.NewVmRef(proxrm.vmid)
+	} else if proxrm.vmname != "" {
+		vmr, err = proxrm.client.GetVmRefByName(proxrm.vmname)
+		if err != nil {
+			return fmt.Errorf("vm ref: %s", err)
+		}
+	}
 
 	// make sure vm reference is not nil
 	if vmr == nil {
