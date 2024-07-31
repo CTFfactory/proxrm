@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"os"
 
-	"proxrm/pkg/proxrm"
+	"github.com/CTFfactory/proxrm/pkg/proxrm"
 )
 
 func usage() {

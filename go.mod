@@ -1,4 +1,4 @@
-module proxrm
+module github.com/CTFfactory/proxrm
 
 go 1.22.5
 
