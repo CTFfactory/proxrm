@@ -152,19 +152,31 @@ func (proxrm *ProxRm) stop() error {
 		return fmt.Errorf("stop vm: %s", err)
 	}
 
-	fmt.Printf(" 🛑 stopped vmid: %d\n", proxrm.vmid)
+	if proxrm.vmname == "empty" {
+		fmt.Printf(" 🛑 stopped vmid: %d\n", proxrm.vmid)
+	} else {
+		fmt.Printf(" 🛑 stopped vmname: %s\n", proxrm.vmname)
+	}
 
 	return err
 }
 
 // Delete the Proxmox vm
 func (proxrm *ProxRm) delete() error {
-	_, err := proxrm.client.DeleteVm(proxrm.vmr)
+	params := map[string]interface{}{
+		"purge": 1,
+		"destroy-unreferenced-disks": 1,
+	}
+	_, err := proxrm.client.DeleteVmParams(proxrm.vmr, params)
 	if err != nil {
-		return fmt.Errorf("delete vmid: %s", err)
+		return fmt.Errorf("delete vmid/vmname: %s", err)
 	}
 
-	fmt.Printf(" 🗑️ deleted vmid: %d\n", proxrm.vmid)
+	if proxrm.vmname == "empty" {
+		fmt.Printf(" 🗑️ deleted vmid: %d\n", proxrm.vmid)
+	} else {
+		fmt.Printf(" 🗑️ deleted vmname: %s\n", proxrm.vmname)
+	}
 
 	return err
 }

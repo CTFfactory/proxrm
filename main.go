@@ -37,18 +37,18 @@ func main() {
 	flag.IntVar(&vmid, "id", 0, "vm id")
 	flag.StringVar(&vmname, "name", "empty", "vm name")
 
-	flag.Parse()
-
-	// usage if no args
-	if len(os.Args) < 3 {
+	if len(os.Args) > 2 {
+		flag.Parse()
+	} else { // usage if no args
 		usage()
 		os.Exit(1)
 	}
 
 	// vmid/vmname
 	// TODO: add more logic to verify
-	if vmid < 100 && vmname == "empty" {
-		fmt.Printf("ERROR: id is %d, and vm name is %s, pick ONE!", vmid, vmname)
+	if (vmid > 100 && vmid < 999999999) || vmname != "empty" {
+	} else {
+		fmt.Printf("ERROR: id is %d, and vm name is \"%s\", id must be between 100 - 999,999,999", vmid, vmname)
 		os.Exit(1)
 	}
 
