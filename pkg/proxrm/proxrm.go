@@ -162,6 +162,8 @@ func (proxrm *ProxRm) stop() error {
 }
 
 // Delete the Proxmox vm
+// Remove VMID from configurations, like backup & replication jobs and HA.
+// Destroy all disks not referenced in the config but with a matching VMID from all enabled storages.
 func (proxrm *ProxRm) delete() error {
 	params := map[string]interface{}{
 		"purge": 1,
