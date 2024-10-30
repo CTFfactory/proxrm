@@ -28,7 +28,7 @@ func main() {
 	var proxrmx *proxrm.ProxRm
 
 	// usage if no args
-	if len(os.Args) < 1 {
+	if len(os.Args) < 3 {
 		usage()
 		os.Exit(1)
 	}
@@ -46,7 +46,11 @@ func main() {
 
 	// vmid/vmname
 	// TODO: add more logic to verify
-	if (vmid > 100 && vmid < 999999999) || vmname != "empty" {
+	if vmid >= 100 && vmid < 999999 && vmname == "empty" {
+	} else if vmid == 0 && vmname != "empty" {
+	} else if vmname == "empty" {
+		fmt.Printf("ERROR: name is required!")
+		os.Exit(1)
 	} else {
 		fmt.Printf("ERROR: id is %d, and vm name is \"%s\", id must be between 100 - 999,999,999", vmid, vmname)
 		os.Exit(1)
