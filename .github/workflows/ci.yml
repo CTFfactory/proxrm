@@ -3,7 +3,7 @@ name: proxrm CI
 
 on:  # yamllint disable-line rule:truthy
   pull_request:
-    branches: [main]
+    branches: ['*']
 
 # https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs#defining-access-for-the-github_token-scopes
 permissions:
