@@ -166,7 +166,7 @@ func (proxrm *ProxRm) stop() error {
 // Destroy all disks not referenced in the config but with a matching VMID from all enabled storages.
 func (proxrm *ProxRm) delete() error {
 	params := map[string]interface{}{
-		"purge": 1,
+		"purge":                      1,
 		"destroy-unreferenced-disks": 1,
 	}
 	_, err := proxrm.client.DeleteVmParams(proxrm.vmr, params)
