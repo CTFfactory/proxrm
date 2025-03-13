@@ -10,6 +10,7 @@
 package proxrm
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 
@@ -18,14 +19,15 @@ import (
 
 // ProxRm app struct for shared storage
 type ProxRm struct {
-	vmid   int
+	ctx    context.Context
+	vmid   uint32
 	vmname string
 	client *proxmox.Client
 	vmr    *proxmox.VmRef
 }
 
 // Run does all the coordinating
-func (proxrm *ProxRm) Run(vmid int, vmname string) error {
+func (proxrm *ProxRm) Run(vmid uint32, vmname string) error {
 	var err error
 
 	// Initialize
@@ -56,10 +58,11 @@ func (proxrm *ProxRm) Run(vmid int, vmname string) error {
 }
 
 // Initialize it all
-func (proxrm *ProxRm) Initialize(vmid int, vmname string) error {
+func (proxrm *ProxRm) Initialize(vmid uint32, vmname string) error {
 	var err error
 	var vmr *proxmox.VmRef
 
+	proxrm.ctx = context.Background()
 	proxrm.vmid = vmid
 	proxrm.vmname = vmname
 
@@ -76,9 +79,9 @@ func (proxrm *ProxRm) Initialize(vmid int, vmname string) error {
 
 	// get vm reference
 	if proxrm.vmid >= 100 {
-		vmr = proxmox.NewVmRef(proxrm.vmid)
+		vmr = proxmox.NewVmRef(proxmox.GuestID(proxrm.vmid))
 	} else if proxrm.vmname != "" {
-		vmr, err = proxrm.client.GetVmRefByName(proxrm.vmname)
+		vmr, err = proxrm.client.GetVmRefByName(proxrm.ctx, proxrm.vmname)
 		if err != nil {
 			return fmt.Errorf("vm ref: %s", err)
 		}
@@ -118,7 +121,7 @@ func (proxrm *ProxRm) newClient() error {
 
 	// authenticate with username/password or username/token
 	if clientConfig.password != "" {
-		err = proxrm.client.Login(clientConfig.username, clientConfig.password, "")
+		err = proxrm.client.Login(proxrm.ctx, clientConfig.username, clientConfig.password, "")
 		if err != nil {
 			return fmt.Errorf("client login: %s", err)
 		}
@@ -137,7 +140,7 @@ func (proxrm *ProxRm) newClient() error {
 // Ping verifies communication with Proxmox server
 func (proxrm *ProxRm) ping() error {
 	// As test, get the version of the server
-	_, err := proxrm.client.GetVersion()
+	_, err := proxrm.client.GetVersion(proxrm.ctx)
 	if err != nil {
 		return fmt.Errorf("ping: %s", err)
 	}
@@ -147,7 +150,7 @@ func (proxrm *ProxRm) ping() error {
 
 // Stop the Proxmox vm
 func (proxrm *ProxRm) stop() error {
-	_, err := proxrm.client.StopVm(proxrm.vmr)
+	_, err := proxrm.client.StopVm(proxrm.ctx, proxrm.vmr)
 	if err != nil {
 		return fmt.Errorf("stop vm: %s", err)
 	}
@@ -169,7 +172,7 @@ func (proxrm *ProxRm) delete() error {
 		"purge":                      1,
 		"destroy-unreferenced-disks": 1,
 	}
-	_, err := proxrm.client.DeleteVmParams(proxrm.vmr, params)
+	_, err := proxrm.client.DeleteVmParams(proxrm.ctx, proxrm.vmr, params)
 	if err != nil {
 		return fmt.Errorf("delete vmid/vmname: %s", err)
 	}

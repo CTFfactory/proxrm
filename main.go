@@ -23,7 +23,7 @@ func usage() {
 
 func main() {
 	var err error
-	var vmid int
+	var vmid uint
 	var vmname string
 	var proxrmx *proxrm.ProxRm
 
@@ -34,7 +34,7 @@ func main() {
 	}
 
 	// command line arguments
-	flag.IntVar(&vmid, "id", 0, "vm id")
+	flag.UintVar(&vmid, "id", 0, "vm id")
 	flag.StringVar(&vmname, "name", "empty", "vm name")
 
 	if len(os.Args) > 2 {
@@ -60,7 +60,7 @@ func main() {
 	proxrmx = new(proxrm.ProxRm)
 
 	// Run
-	err = proxrmx.Run(vmid, vmname)
+	err = proxrmx.Run(uint32(vmid), vmname)
 	if err != nil {
 		fmt.Printf("ERROR: Run: %s\n", err)
 		os.Exit(1)
