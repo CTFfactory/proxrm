@@ -81,7 +81,7 @@ func (proxrm *ProxRm) Initialize(vmid uint32, vmname string) error {
 	if proxrm.vmid >= 100 {
 		vmr = proxmox.NewVmRef(proxmox.GuestID(proxrm.vmid))
 	} else if proxrm.vmname != "" {
-		vmr, err = proxrm.client.GetVmRefByName(proxrm.ctx, proxrm.vmname)
+		vmr, err = proxrm.client.GetVmRefByName(proxrm.ctx, proxmox.GuestName(proxrm.vmname))
 		if err != nil {
 			return fmt.Errorf("vm ref: %s", err)
 		}

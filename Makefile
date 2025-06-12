@@ -50,7 +50,7 @@ test:
 
 get:
 	@echo " 🔘 Go Get"
-	@$(GOLANG) get github.com/Telmate/proxmox-api-go/@latest
+	@$(GOLANG) get github.com/Telmate/proxmox-api-go@latest
 
 format:
 	@echo " 🔘 Go Format"
